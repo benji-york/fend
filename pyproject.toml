@@ -1,0 +1,13 @@
+[project]
+name = 'fend'
+description = 'Have lots of projects? Want to ensure they all follow the same patterns? Fend can help.'
+version = '0.0.0'
+authors = [{name = 'Benji York', email = 'benji@benjiyork.com'}]
+dependencies = ['build']
+
+[project.urls]
+homepage = 'https://github.com/benji-york/fend'
+
+[build-system]
+build-backend = 'flit_core.buildapi'
+requires = ['flit_core >=3.2,<4']

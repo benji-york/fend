@@ -1,0 +1,13 @@
+.installed.cfg
+develop-eggs/
+dist/
+docs/
+src/manuel.egg-info/
+parts/
+*.pyc
+__pycache__/
+.coverage
+coverage.xml
+.eggs/
+htmlcov
+ve/
