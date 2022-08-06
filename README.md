@@ -10,7 +10,7 @@ projects.
 
 ## Getting started
 
-You can define your own custom patters for Fend to use, but it's easiest to get started
+You can define your own custom patterns for Fend to use, but it's easiest to get started
 with one of the pre-built patterns.  One of the easiest to start with is
 `trailing-whitespace`.
 
