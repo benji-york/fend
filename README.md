@@ -12,7 +12,7 @@ projects.
 
 You can define your own custom patters for Fend to use, but it's easiest to get started
 with one of the pre-built patterns.  One of the easiest to start with is
-trailing-whitespace.
+`trailing-whitespace`.
 
 To see what that pattern thinks about your project, first install Fend.
 
