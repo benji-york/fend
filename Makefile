@@ -127,7 +127,7 @@ badges:
 ifeq '$(shell git rev-parse --abbrev-ref HEAD)' 'main'
 release: clean-dist dist assert-one-dist assert-no-changes upload
 	# now that a release has happened, tag the current HEAD as that release
-	git tag $(version)
+	git tag $(package-version)
 	git push origin
 	git push origin --tags
 else
