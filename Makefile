@@ -40,7 +40,7 @@ build: ve development-utilities
 
 ve:
 	python$(PYTHON_VERSION) -m venv ve
-	#$(pip-install) -e .
+	$(pip-install) -e .
 
 ve/bin/genbadge:
 	$(pip-install) genbadge[coverage]
