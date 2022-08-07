@@ -31,10 +31,10 @@ fend check --enable=trailing-whitespace my_file.py
 When you run the above, you might see something like this:
 
 ```
-my_file.py:23 trailing whitespace (trailing-whitespace)
+my_file.py:1 trailing whitespace (trailing-whitespace)
 ```
 
-This is Fend telling you that it found a pattern violation on line 23 of `my_file.py`, a
+This is Fend telling you that it found a pattern violation on line 1 of `my_file.py`, a
 message about the violation and which pattern triggered the message.
 
 At this point you might want Fend to tell you what it thinks would fix the violation.
@@ -48,13 +48,16 @@ You will then see the same message as before plus a diff describing what change 
 be made to conform to the pattern.
 
 ```diff
---- my_file.py
-+++ my_file.py
-@@ -1,23 +1,23 @@
--This is a line of text. 
-+This is a line of text.
-?                       ^
+- print('Hello, World!')
+?                       -
++ print('Hello, World!')
 ```
+
+A `-` in the first column indicates lines that would be removed; `+` indicates lines
+that would be added.  The `?` lines are hints as to what differs between the lines.
+
+In the above case, the question mark hint is indicating that a space character is being
+removed (`-`) from the line above.
 
 ## Fixing files
 
