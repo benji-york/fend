@@ -19,7 +19,7 @@ package-version := $(shell \
 
 platform := $(shell python -c 'import sys; print(sys.platform)')
 
-PYTHON_VERSION ?= 3
+PYTHON_VERSION ?= 3.10
 
 export PIP_DISABLE_PIP_VERSION_CHECK=1
 pip-install := ve/bin/pip --no-input install --constraint constraints.txt
