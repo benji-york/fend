@@ -7,10 +7,10 @@ from fend import File, Location, Pattern, Project, Violation
 from fend.stock import general
 
 
-app = typer.Typer()
+_app = typer.Typer()
 
 
-@app.callback()
+@_app.callback()
 def _documentation():
     """Ensure all of your projects follow the same patterns.
 
@@ -43,7 +43,7 @@ def _complete_patterns():
     return list(general.patterns.keys())
 
 
-@app.command()
+@_app.command()
 def check(
     filespec: str = typer.Argument(...),
     diff: bool = typer.Option(False, help='Print a fix for each violation as a diff.'),
@@ -67,7 +67,7 @@ def check(
             print(''.join(list(differ.compare(violation.before, violation.after))))
 
 
-@app.command()
+@_app.command()
 def fix(
     filespec: str = typer.Argument(...),
     enable: Optional[list[str]] = typer.Option(
@@ -84,7 +84,4 @@ def fix(
         _fix(violation)
 
 
-main = app
-
-if __name__ == "__main__":
-    main()
+main = _app
