@@ -11,12 +11,13 @@ app = typer.Typer()
 
 
 @app.callback()
-def documentation():
+def _documentation():
     """Ensure all of your projects follow the same patterns.
 
     Fend manages a collection of linters (both pre-built and custom) to enforce patterns
     across all of your projects.
     """
+    # This function exists only to provid the text above for the CLI.
 
 
 def _fix(violation: Violation) -> None:
@@ -37,7 +38,7 @@ def _find_enabled_patterns(enable: list[str]) -> list[Pattern]:
     return enabled_patterns
 
 
-def complete_patterns():
+def _complete_patterns():
     """Find the list of patterns avaialble to the user.  Used in CLI completion."""
     return list(general.patterns.keys())
 
@@ -47,7 +48,7 @@ def check(
     filespec: str = typer.Argument(...),
     diff: bool = typer.Option(False, help='Print a fix for each violation as a diff.'),
     enable: Optional[list[str]] = typer.Option(
-        None, help='Enable the given patterns.', autocompletion=complete_patterns
+        None, help='Enable the given patterns.', autocompletion=_complete_patterns
     ),
 ) -> None:
     """Check one or more files for compliance with one or more enabled patterns."""
@@ -70,7 +71,7 @@ def check(
 def fix(
     filespec: str = typer.Argument(...),
     enable: Optional[list[str]] = typer.Option(
-        None, help='Enable the given patterns.', autocompletion=complete_patterns
+        None, help='Enable the given patterns.', autocompletion=_complete_patterns
     ),
 ) -> None:
     """Fix any found violations of one or more enabled patterns."""
