@@ -7,13 +7,24 @@ from fend import File, Location, Pattern, Project, Violation
 from fend.stock import general
 
 
+app = typer.Typer()
+
+
+@app.callback()
+def documentation():
+    """Ensure all of your projects follow the same patterns.
+
+    Fend manages a collection of linters (both pre-built and custom) to enforce patterns
+    across all of your projects.
+    """
+
+
 def _fix(violation: Violation) -> None:
     lines = violation.location.file.lines
     line_index = violation.location.line - 1
     lines[line_index : line_index + len(violation.before)] = violation.after
     violation.location.file_path.write_text(''.join(lines))
 
-app = typer.Typer()
 
 def _find_enabled_patterns(enable: list[str]) -> list[Pattern]:
     enabled_patterns = []
@@ -26,8 +37,19 @@ def _find_enabled_patterns(enable: list[str]) -> list[Pattern]:
     return enabled_patterns
 
 
+def complete_patterns():
+    """Find the list of patterns avaialble to the user.  Used in CLI completion."""
+    return list(general.patterns.keys())
+
+
 @app.command()
-def check(filespec: str = typer.Argument(...), diff: bool = False, enable: Optional[list[str]] = typer.Option(None)) -> None:
+def check(
+    filespec: str = typer.Argument(...),
+    diff: bool = typer.Option(False, help='Print a fix for each violation as a diff.'),
+    enable: Optional[list[str]] = typer.Option(
+        None, help='Enable the given patterns.', autocompletion=complete_patterns
+    ),
+) -> None:
     """Check one or more files for compliance with one or more enabled patterns."""
     enabled_patterns = _find_enabled_patterns(enable or [])
     violations = []
@@ -45,7 +67,12 @@ def check(filespec: str = typer.Argument(...), diff: bool = False, enable: Optio
 
 
 @app.command()
-def fix(filespec: str = typer.Argument(...), enable: Optional[list[str]] = typer.Option(None)) -> None:
+def fix(
+    filespec: str = typer.Argument(...),
+    enable: Optional[list[str]] = typer.Option(
+        None, help='Enable the given patterns.', autocompletion=complete_patterns
+    ),
+) -> None:
     """Fix any found violations of one or more enabled patterns."""
     enabled_patterns = _find_enabled_patterns(enable or [])
     violations = []
@@ -54,6 +81,7 @@ def fix(filespec: str = typer.Argument(...), enable: Optional[list[str]] = typer
 
     for violation in violations:
         _fix(violation)
+
 
 main = app
 
