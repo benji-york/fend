@@ -31,18 +31,17 @@ class _Makefile:
         self._parse()
 
     def _parse(self):
-        process = subprocess.run(['make', '-pn', self._filepath], check=True,
+        process = subprocess.run(['make', '-pn', '-f', self._filepath],
             encoding='utf8',
             stdout = subprocess.PIPE,
             stderr = subprocess.PIPE,
         )
         targets = set()
         line_iter = iter(process.stdout.splitlines())
-        for line in process.stdout.splitlines():
-            #if line.startswith('# Not a target:'):
-            #    import pdb;pdb.set_trace()
-            #    next(line_iter)
-            #    continue
+        for line in line_iter:
+            if line.startswith('# Not a target:'):
+                next(line_iter)
+                continue
             if match := re.match('^(\S+):.*$', line):
                 targets.add(match.group(1))
 
