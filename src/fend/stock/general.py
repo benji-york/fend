@@ -14,7 +14,6 @@ class TrailingWhitespace(Pattern):
         files = project.get_files()
         violations = []
         for file in files:
-            after_line_index = 1
             for line_index, line in enumerate(file.lines):
                 after_line = line.rstrip() + '\n'
                 if after_line != line:
