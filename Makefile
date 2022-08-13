@@ -27,7 +27,7 @@ pip-check := ve/bin/pip show -q
 
 source_code := src
 
-isort := ve/bin/isort --multi-line=VERTICAL_HANGING_INDENT --trailing-comma --no-sections 
+isort := ve/bin/isort --multi-line=VERTICAL_HANGING_INDENT --trailing-comma --no-sections
 
 ########################################################################################
 # Build targets
