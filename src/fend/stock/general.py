@@ -30,6 +30,4 @@ class TrailingWhitespace(Pattern):
         return violations
 
 
-patterns: dict[str, Any] = {
-    TrailingWhitespace.id: TrailingWhitespace,
-}
+patterns: set = {TrailingWhitespace}

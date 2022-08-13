@@ -79,10 +79,12 @@ class Violation:
     location: Location
     # The lines that encompas the violation, plus any context that is needed for
     # applying the fix.
-    before: list[str]
+    before: list[str] | None
     # The lines that would fix the violation if used to replace the "before" lines.
-    after: list[str]
+    after: list[str] | None
 
     def __post_init__(self) -> None:
-        assert all(line[-1] == '\n' for line in self.before)
-        assert all(line[-1] == '\n' for line in self.after)
+        if self.before is not None:
+            assert all(line[-1] == '\n' for line in self.before)
+        if self.after is not None:
+            assert all(line[-1] == '\n' for line in self.after)

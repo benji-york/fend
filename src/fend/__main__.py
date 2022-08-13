@@ -4,7 +4,7 @@ import sys
 import typer
 from typing import Optional
 from fend import File, Location, Pattern, Project, Violation
-from fend.stock import general
+from fend.stock import general, make
 
 
 _app = typer.Typer()
@@ -26,12 +26,13 @@ def _fix(violation: Violation) -> None:
     lines[line_index : line_index + len(violation.before)] = violation.after
     violation.location.file_path.write_text(''.join(lines))
 
+def _find_patterns():
+    return general.patterns | make.patterns
 
 def _find_enabled_patterns(enable: list[str]) -> list[Pattern]:
     enabled_patterns = []
-    for pattern_id, pattern in general.patterns.items():
-        assert pattern_id == pattern.id, 'pattern ID must be consistent'
-        if pattern_id in enable:
+    for pattern in _find_patterns():
+        if pattern.id in enable:
             pattern_instance = pattern()
             pattern_instance.validate()
             enabled_patterns.append(pattern_instance)
@@ -40,7 +41,7 @@ def _find_enabled_patterns(enable: list[str]) -> list[Pattern]:
 
 def _complete_patterns():
     """Find the list of patterns avaialble to the user.  Used in CLI completion."""
-    return list(general.patterns.keys())
+    return [pattern.id for pattern in _find_patterns()]
 
 
 @_app.command()
