@@ -23,7 +23,9 @@ class Project:
         self.filespec = filespec
 
     def get_files(self) -> list[File]:
-        return [File('my_file.py')]
+        path = Path(self.filespec)
+        assert path.is_file(), 'path must point to a file'
+        return [File(path)]
 
 
 @dataclass(frozen=True)
