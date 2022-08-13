@@ -20,7 +20,9 @@ def _find_enabled_patterns(enable: list[str]) -> list[Pattern]:
     for pattern_id, pattern in general.patterns.items():
         assert pattern_id == pattern.id, 'pattern ID must be consistent'
         if pattern_id in enable:
-            enabled_patterns.append(pattern())
+            pattern_instance = pattern()
+            pattern_instance.validate()
+            enabled_patterns.append(pattern_instance)
     return enabled_patterns
 
 

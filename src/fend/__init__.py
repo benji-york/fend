@@ -53,12 +53,6 @@ class Pattern(abc.ABC):
     """
 
     id: str  # e.g., 'trailing-whitespace'
-    summary: str
-
-    def __post_init__(self) -> None:
-        assert '\n' not in self.summary, 'summaries must not contain newlines'
-        assert len(self.summary) <= 80, 'summaries must be 80 characters or fewer'
-        assert ' ' not in self.id, 'IDs may not contain spaces'
 
     @abc.abstractmethod
     def check(self, project: Project) -> list['Violation']:
@@ -67,6 +61,7 @@ class Pattern(abc.ABC):
     def validate(self) -> None:
         """Verify that the pattern does not break any known rules."""
         assert ' ' not in self.id
+        assert ' ' not in self.id, 'IDs may not contain spaces'
 
 
 @dataclass(frozen=True)
