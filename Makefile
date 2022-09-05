@@ -68,6 +68,7 @@ vendor:
 
 vendor/tree-sitter-make: vendor
 	git clone git@github.com:benji-york/tree-sitter-make.git vendor/tree-sitter-make
+	cd vendor/tree-sitter-make; git switch benji/add-argument-parsing
 	ve/bin/python scripts/build_tree_sitter.py
 
 ########################################################################################
