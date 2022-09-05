@@ -6,7 +6,7 @@ from typing import Any
 
 
 class TrailingWhitespace(Pattern):
-    """This pattern idientifies lines with trailing whitespace."""
+    """This pattern identifies lines with trailing whitespace."""
 
     id = 'trailing-whitespace'
 

@@ -26,8 +26,10 @@ def _fix(violation: Violation) -> None:
     lines[line_index : line_index + len(violation.before)] = violation.after
     violation.location.file_path.write_text(''.join(lines))
 
+
 def _find_patterns():
     return general.patterns | make.patterns
+
 
 def _find_enabled_patterns(enable: list[str]) -> list[Pattern]:
     enabled_patterns = []

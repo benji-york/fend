@@ -36,7 +36,7 @@ isort := ve/bin/isort --multi-line=VERTICAL_HANGING_INDENT --trailing-comma --no
 # run.  I.e., it is ok if "make lint" generates an error before "make" has been run.
 
 .PHONY: build
-build: ve development-utilities
+build: ve development-utilities vendor/tree-sitter-make
 
 ve:
 	python$(PYTHON_VERSION) -m venv ve
@@ -62,6 +62,13 @@ development-utilities: ve/bin/pyinstaller
 development-utilities: ve/bin/pylint
 development-utilities: ve/bin/twine
 development-utilities: ve/bin/wheel
+
+vendor:
+	mkdir vendor
+
+vendor/tree-sitter-make: vendor
+	git clone git@github.com:benji-york/tree-sitter-make.git vendor/tree-sitter-make
+	ve/bin/python scripts/build_tree_sitter.py
 
 ########################################################################################
 # Distribution targets
@@ -167,7 +174,7 @@ lint: black-check isort-check
 
 .PHONY: test
 test:
-	ve/bin/python setup.py test
+	ve/bin/python -m unittest discover src
 
 .PHONY: coverage
 coverage:
@@ -201,4 +208,4 @@ clean-pycache:
 	find . -name __pycache__ -delete
 
 .PHONY: clean
-clean: clean-ve clean-pycache clean-dist
+clean: clean-ve clean-pycache clean-dist clean-vendor
