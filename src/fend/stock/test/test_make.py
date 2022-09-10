@@ -1,8 +1,14 @@
-import unittest
-import pathlib
 import fend
+import pathlib
+import unittest
+import textwrap
+from ..make import (
+    SuperfolousSpaceInCall,
+    _extract_call_arguments,
+    _extract_calls,
+    _extract_targets,
+)
 from fend import Project
-from ..make import _extract_calls, _extract_call_arguments, SuperfolousSpaceInCall
 
 corpus_path = pathlib.Path(fend.__file__).parent.joinpath('test/corpus/make/')
 
@@ -31,6 +37,27 @@ class TestCallParser(unittest.TestCase):
             _extract_calls('first: $(call one), then $(call two), more'),
             ['$(call one)', '$(call two)'],
         )
+
+
+class Test_extract_targets(unittest.TestCase):
+    """Tests for the _extract_targets() function."""
+
+    def test_empty_file(self):
+        """An empty Makefile has no targets."""
+        self.assertEqual(_extract_targets(''), [])
+
+    def test_no_targets(self):
+        """A non-empty Makefile may also have no targets."""
+        self.assertEqual(_extract_targets('x := "value"'), [])
+
+    def test_target(self):
+        """A target is detected."""
+        text = textwrap.dedent("""\
+            x := "foo"
+            check: test lint
+        """)
+        self.assertEqual(_extract_targets(text), ['check'])
+
 
 class Test_extract_call_arguments(unittest.TestCase):
     """Tests for the _extract_call_arguments() function."""

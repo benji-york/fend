@@ -1,14 +1,12 @@
 """Fend patterns for Makefiles."""
 
-from fend import File, Location, Pattern, Project, Violation
 import re
 import subprocess
 import tree_sitter
+from fend import File, Location, Pattern, Project, Violation
 from pathlib import Path
-
 ## XXX This might should go somewhere else.
 from tree_sitter import Language, Parser
-
 
 MAKE_LANGUAGE = tree_sitter.Language('build/my-languages.so', 'make')
 
@@ -44,6 +42,14 @@ def _node_text(node):
 # https://github.com/mrtazz/checkmake
 
 
+def _extract_targets(text: str) -> str:
+    """Extract Make targets from a Makefile."""
+    parser = Parser()
+    parser.set_language(MAKE_LANGUAGE)
+    tree = parser.parse(bytes(text, 'utf8'))
+    return list(map(_node_text, _find_nodes_by_type(tree.root_node, 'targets')))
+
+
 def _extract_calls(lines: str) -> str:
     """Extract Make function calls from a (potentially) multi-line string."""
     parser = Parser()
@@ -70,30 +76,15 @@ _required_targets = {'build', 'lint', 'test', 'check', 'clean'}
 class _Makefile:
     """Information about a Makefile."""
 
-    def __init__(self, filepath: str | Path):
-        self._filepath = Path(filepath)
-        self._parse()
+    def __init__(self, file: File):
+        self._file = file
+        self._parse_targets()
 
-    def _parse(self):
-        process = subprocess.run(
-            ['make', '-pn', '-f', self._filepath],
-            encoding='utf8',
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-        )
-        targets = set()
-        line_iter = iter(process.stdout.splitlines())
-        for line in line_iter:
-            if line.startswith('# Not a target:'):
-                next(line_iter)
-                continue
-            if match := re.match('^(\S+):.*$', line):
-                targets.add(match.group(1))
-
-        self.targets = frozenset(targets)
+    def _parse_targets(self):
+        self.targets = frozenset(_extract_targets(self._file.read_text()))
 
     def parse_calls(self):
-        return _extract_calls(self._filepath.read_text('utf-8'))
+        return _extract_calls(self._file.read_text())
 
 
 class RequiredTargets(Pattern):
@@ -130,7 +121,7 @@ class SuperfolousSpaceInCall(Pattern):
         files = project.get_files()
         violations = []
         for file in files:
-            makefile = _Makefile(file.path)
+            makefile = _Makefile(file)
             for call in makefile.parse_calls():
                 for arguments in _extract_call_arguments(call):
                     location = Location(file.path, line=line_index + 1, column=1)

@@ -11,9 +11,12 @@ class File:
     def __init__(self, path: Path | str) -> None:
         self.path = Path(path)
 
+    def read_text(self) -> list[str]:
+        return self.path.read_text('utf-8')
+
     @property
     def lines(self) -> list[str]:
-        return self.path.read_text().splitlines(keepends=True)
+        return self.read_text().splitlines(keepends=True)
 
 
 class Project:

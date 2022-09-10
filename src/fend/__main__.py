@@ -1,11 +1,10 @@
 import difflib
-from pathlib import Path
 import sys
 import typer
-from typing import Optional
 from fend import File, Location, Pattern, Project, Violation
 from fend.stock import general, make
-
+from pathlib import Path
+from typing import Optional
 
 _app = typer.Typer()
 
