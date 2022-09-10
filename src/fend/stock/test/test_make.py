@@ -1,16 +1,17 @@
 import fend
 import pathlib
-import unittest
 import textwrap
+import unittest
 from ..make import (
     SuperfolousSpaceInCall,
     _extract_call_arguments,
     _extract_calls,
     _extract_targets,
 )
-from fend import Project
+from fend import File, Location, Pattern, Project, Violation
 
 corpus_path = pathlib.Path(fend.__file__).parent.joinpath('test/corpus/make/')
+
 
 class TestCallParser(unittest.TestCase):
     """Tests for the $(call ...) syntax parsing."""
@@ -52,10 +53,12 @@ class Test_extract_targets(unittest.TestCase):
 
     def test_target(self):
         """A target is detected."""
-        text = textwrap.dedent("""\
+        text = textwrap.dedent(
+            """\
             x := "foo"
             check: test lint
-        """)
+        """
+        )
         self.assertEqual(_extract_targets(text), ['check'])
 
 
@@ -108,11 +111,26 @@ class TestSuperfolousSpaceInCall(unittest.TestCase):
     def test_empty_makefile(self):
         """If the Makefile is completely empty, no messages are reported."""
         self.assertEqual(
-            SuperfolousSpaceInCall().check(Project(corpus_path / 'empty.mk')),
-            [])
+            SuperfolousSpaceInCall().check(
+                Project.from_file_path(corpus_path / 'empty.mk')
+            ),
+            [],
+        )
 
     def test_no_extra_spaces(self):
         """If there are no extra spaces, no message is generated."""
         self.assertEqual(
-            SuperfolousSpaceInCall().check(Project(corpus_path / 'trailing-whitespace.mk')),
-            [])
+            SuperfolousSpaceInCall().check(
+                Project.from_file_path(corpus_path / 'trailing-whitespace.mk')
+            ),
+            [],
+        )
+
+    def test_no_extra_spaces(self):
+        """If there are no extra spaces, no message is generated."""
+        self.assertEqual(
+            SuperfolousSpaceInCall().check(
+                Project.from_file_path(corpus_path / 'trailing-whitespace.mk')
+            ),
+            [],
+        )

@@ -5,7 +5,6 @@ import subprocess
 import tree_sitter
 from fend import File, Location, Pattern, Project, Violation
 from pathlib import Path
-## XXX This might should go somewhere else.
 from tree_sitter import Language, Parser
 
 MAKE_LANGUAGE = tree_sitter.Language('build/my-languages.so', 'make')
@@ -81,10 +80,10 @@ class _Makefile:
         self._parse_targets()
 
     def _parse_targets(self):
-        self.targets = frozenset(_extract_targets(self._file.read_text()))
+        self.targets = frozenset(_extract_targets(self._file.text))
 
     def parse_calls(self):
-        return _extract_calls(self._file.read_text())
+        return _extract_calls(self._file.text)
 
 
 class RequiredTargets(Pattern):
@@ -118,9 +117,8 @@ class SuperfolousSpaceInCall(Pattern):
     id = 'make/superfluous-space-in-call'
 
     def check(self, project: Project) -> list[Violation]:
-        files = project.get_files()
         violations = []
-        for file in files:
+        for file in project.files:
             makefile = _Makefile(file)
             for call in makefile.parse_calls():
                 for arguments in _extract_call_arguments(call):

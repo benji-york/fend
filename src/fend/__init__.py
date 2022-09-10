@@ -8,27 +8,35 @@ class File:
 
     path: Path
 
-    def __init__(self, path: Path | str) -> None:
+    def __init__(self, path: Path | str, text: str | None = None) -> None:
         self.path = Path(path)
-
-    def read_text(self) -> list[str]:
-        return self.path.read_text('utf-8')
+        if text is None:
+            text = self.path.read_text('utf-8')
+        self.text = text
 
     @property
     def lines(self) -> list[str]:
-        return self.read_text().splitlines(keepends=True)
+        return self.text.splitlines(keepends=True)
 
 
 class Project:
     """A representation of an entire project that is to be validated."""
 
-    def __init__(self, filespec: str) -> None:
-        self.filespec = filespec
+    @classmethod
+    def from_file_path(cls, path: str | Path) -> 'Project':
+        project = cls()
+        project.files = [File(path)]
+        return project
 
-    def get_files(self) -> list[File]:
-        path = Path(self.filespec)
-        assert path.is_file(), 'path must point to a file'
-        return [File(path)]
+    @classmethod
+    def from_files(cls, files: list[File]) -> 'Project':
+        project = cls()
+        project.files = files
+        return project
+
+    @classmethod
+    def from_text(cls, text: str):
+        return Project.from_files([File(path='/tmp/fake/path', text=text)])
 
 
 @dataclass(frozen=True)
