@@ -177,14 +177,8 @@ lint: black-check isort-check
 test:
 	ve/bin/python -m unittest discover src
 
-.PHONY: coverage
-coverage:
-	ve/bin/coverage run --branch setup.py test
-	ve/bin/coverage xml  # the XML output file is used by the "badges" target
-	PYTHONWARNINGS=ignore ve/bin/coverage report --ignore-errors --fail-under=97 --show-missing --skip-empty
-
 .PHONY: check
-check: test lint coverage
+check: test lint
 
 ########################################################################################
 # Sorce code formatting targets
