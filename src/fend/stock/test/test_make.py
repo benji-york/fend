@@ -1,5 +1,4 @@
 import fend
-from pathlib import Path
 import textwrap
 import unittest
 from ..make import (
@@ -8,6 +7,7 @@ from ..make import (
     _extract_targets,
 )
 from fend import File, Location, Pattern, Project, Violation
+from pathlib import Path
 
 corpus_path = Path(fend.__file__).parent.joinpath('test/corpus/make/')
 

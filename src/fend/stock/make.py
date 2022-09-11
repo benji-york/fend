@@ -3,10 +3,10 @@
 import re
 import subprocess
 import tree_sitter
-from typing import Any
 from fend import File, Location, Pattern, Project, Violation
 from pathlib import Path
 from tree_sitter import Language, Parser
+from typing import Any
 
 MAKE_LANGUAGE = tree_sitter.Language('build/my-languages.so', 'make')
 

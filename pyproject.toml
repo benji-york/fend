@@ -3,7 +3,7 @@ name = 'fend'
 description = 'Have lots of projects? Want to ensure they all follow the same patterns? Fend can help.'
 version = '0.0.0'
 authors = [{name = 'Benji York', email = 'benji@benjiyork.com'}]
-dependencies = ['build', 'tree_sitter==0.20.0']
+dependencies = ['build', 'tree_sitter==0.20.0', 'typer']
 
 [project.urls]
 homepage = 'https://github.com/benji-york/fend'
