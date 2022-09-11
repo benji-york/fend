@@ -18,6 +18,9 @@ class File:
     def lines(self) -> list[str]:
         return self.text.splitlines(keepends=True)
 
+    def get_line(self, line_no: int):
+        return self.lines[line_no - 1]
+
 
 class Project:
     """A representation of an entire project that is to be validated."""

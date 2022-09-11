@@ -3,6 +3,7 @@
 import re
 import subprocess
 import tree_sitter
+from typing import Any
 from fend import File, Location, Pattern, Project, Violation
 from pathlib import Path
 from tree_sitter import Language, Parser
@@ -32,6 +33,7 @@ def _node_text(node):
 # no non-phony target depends on a phony target
 # no phony target depends on a non-phony target
 # see https://clarkgrubb.com/makefile-style-guide about above two
+# make it easier to construct Locations from nodes
 
 # other sources for rules:
 # https://style-guides.readthedocs.io/en/latest/makefile.html
@@ -49,12 +51,12 @@ def _extract_targets(text: str) -> str:
     return list(map(_node_text, _find_nodes_by_type(tree.root_node, 'targets')))
 
 
-def _extract_calls(lines: str) -> str:
+def _extract_call_nodes(lines: str) -> Any:  # XXX really a tree-sitter node
     """Extract Make function calls from a (potentially) multi-line string."""
     parser = Parser()
     parser.set_language(MAKE_LANGUAGE)
     tree = parser.parse(bytes(lines, 'utf8'))
-    return list(map(_node_text, _find_nodes_by_type(tree.root_node, 'function_call')))
+    return _find_nodes_by_type(tree.root_node, 'function_call')
 
 
 def _extract_call_arguments(call: str) -> str:
@@ -82,9 +84,6 @@ class _Makefile:
     def _parse_targets(self):
         self.targets = frozenset(_extract_targets(self._file.text))
 
-    def parse_calls(self):
-        return _extract_calls(self._file.text)
-
 
 class RequiredTargets(Pattern):
     """This pattern identifies targets that should always be available."""
@@ -111,6 +110,17 @@ class RequiredTargets(Pattern):
         return violations
 
 
+def get_children_by_type(
+    node: Any, child_type: str
+) -> list[Any]:  # XXX really list[node]
+    return [child for child in node.children if child.type == child_type]
+
+
+def line_and_column_from_node(node: Any) -> tuple[int, int]:  # XXX really node
+    line, column = node.start_point
+    return (line + 1, column + 1)
+
+
 class SuperfolousSpaceInCall(Pattern):
     """This pattern identifies and fixes extra spaces in uses of $(call ...)."""
 
@@ -119,17 +129,35 @@ class SuperfolousSpaceInCall(Pattern):
     def check(self, project: Project) -> list[Violation]:
         violations = []
         for file in project.files:
-            makefile = _Makefile(file)
-            for call in makefile.parse_calls():
-                for arguments in _extract_call_arguments(call):
-                    location = Location(file.path, line=line_index + 1, column=1)
+            for call in _extract_call_nodes(file.text):
+                for argument in _find_nodes_by_type(call, 'argument'):
+                    text = argument.text.decode('utf-8')
+                    if not text.startswith(' '):
+                        continue
+
+                    line_no, column_no = line_and_column_from_node(argument)
+                    # If the argument is entirely on one line, it is easy to make make a
+                    # before and after.
+                    if argument.start_point[0] == argument.end_point[0]:
+                        before_line = file.get_line(line_no)
+                        before = [before_line]
+                        after = [
+                            before_line[: argument.start_point[1]]
+                            + text.lstrip()
+                            + before_line[argument.end_point[1] :]
+                        ]
+                    else:
+                        before = None
+                        after = None
+
+                    location = Location(file.path, line=line_no, column=column_no)
                     violations.append(
                         Violation(
                             (self.id,),
-                            f'missing required target in Makefile: {required_target}',
+                            f'function call includes superfluous space',
                             location,
-                            before=None,
-                            after=None,
+                            before=before,
+                            after=after,
                         )
                     )
         return violations

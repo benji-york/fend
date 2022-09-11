@@ -1,43 +1,15 @@
 import fend
-import pathlib
+from pathlib import Path
 import textwrap
 import unittest
 from ..make import (
     SuperfolousSpaceInCall,
     _extract_call_arguments,
-    _extract_calls,
     _extract_targets,
 )
 from fend import File, Location, Pattern, Project, Violation
 
-corpus_path = pathlib.Path(fend.__file__).parent.joinpath('test/corpus/make/')
-
-
-class TestCallParser(unittest.TestCase):
-    """Tests for the $(call ...) syntax parsing."""
-
-    def test_extracting_calls(self):
-        """The _extract_calls() function can extract a call from a line."""
-        self.assertEqual(
-            _extract_calls('$(call one)'),
-            ['$(call one)'],
-        )
-        self.assertEqual(
-            _extract_calls('foo: before $(call one,two,three) after'),
-            ['$(call one,two,three)'],
-        )
-        self.assertEqual(
-            _extract_calls('before $(call one, $(eval $(value "string")),three) after'),
-            [
-                '$(call one, $(eval $(value "string")),three)',
-                '$(eval $(value "string"))',
-                '$(value "string")',
-            ],
-        )
-        self.assertEqual(
-            _extract_calls('first: $(call one), then $(call two), more'),
-            ['$(call one)', '$(call two)'],
-        )
+corpus_path = Path(fend.__file__).parent.joinpath('test/corpus/make/')
 
 
 class Test_extract_targets(unittest.TestCase):
@@ -126,11 +98,35 @@ class TestSuperfolousSpaceInCall(unittest.TestCase):
             [],
         )
 
-    def test_no_extra_spaces(self):
-        """If there are no extra spaces, no message is generated."""
+    def test_extra_spaces(self):
+        """If there are extra spaces, a message describing the issue is generated."""
+        text = 'x := $(call function, one)\n'
         self.assertEqual(
-            SuperfolousSpaceInCall().check(
-                Project.from_file_path(corpus_path / 'trailing-whitespace.mk')
-            ),
-            [],
+            SuperfolousSpaceInCall().check(Project.from_text(text)),
+            [
+                Violation(
+                    tags=('make/superfluous-space-in-call',),
+                    summary='function call includes superfluous space',
+                    location=Location(
+                        file_path=Path('/tmp/fake/path'), line=1, column=22
+                    ),
+                    before=['x := $(call function, one)\n'],
+                    after=['x := $(call function,one)\n'],
+                )
+            ],
         )
+
+    def test_multiple_instances_of_extra_spaces(self):
+        """More than one group of extra spaces means a message is generated for each."""
+        text = 'x := $(call function, one, two, three)\n'
+        violations = SuperfolousSpaceInCall().check(Project.from_text(text))
+        self.assertEqual(len(violations), 3)
+        violation_columns = []
+        for violation in violations:
+            self.assertIn('make/superfluous-space-in-call', violation.tags)
+            self.assertEqual(len(violation.tags), 1)
+            # each violation happened at a different column
+            self.assertNotIn(violation.location.column, violation_columns)
+            violation_columns.append(violation.location.column)
+
+        assert len(violation_columns) == 3, 'all violation columns were seen'
