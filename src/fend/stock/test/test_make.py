@@ -116,6 +116,24 @@ class TestSuperfolousSpaceInCall(unittest.TestCase):
             ],
         )
 
+    def test_multiple_spaces(self):
+        """If there are more than one extra space, a single message is generated."""
+        text = 'x := $(call function,    one)\n'
+        self.assertEqual(
+            SuperfolousSpaceInCall().check(Project.from_text(text)),
+            [
+                Violation(
+                    tags=('make/superfluous-space-in-call',),
+                    summary='function call includes superfluous space',
+                    location=Location(
+                        file_path=Path('/tmp/fake/path'), line=1, column=22
+                    ),
+                    before=['x := $(call function,    one)\n'],
+                    after=['x := $(call function,one)\n'],
+                )
+            ],
+        )
+
     def test_multiple_instances_of_extra_spaces(self):
         """More than one group of extra spaces means a message is generated for each."""
         text = 'x := $(call function, one, two, three)\n'
