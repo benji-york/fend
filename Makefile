@@ -25,6 +25,8 @@ export PIP_DISABLE_PIP_VERSION_CHECK=1
 pip-install := ve/bin/pip --no-input install --constraint constraints.txt
 pip-check := ve/bin/pip show -q
 
+$(call foo,bar,baz)
+
 source_code := src
 
 isort := ve/bin/isort --multi-line=VERTICAL_HANGING_INDENT --trailing-comma --no-sections

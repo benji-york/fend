@@ -71,18 +71,6 @@ def _extract_call_arguments(call: str) -> str:
     return list(map(_node_text, arguments))
 
 
-_required_targets = {'build', 'lint', 'test', 'check', 'clean'}
-
-
-class _Makefile:
-    """Information about a Makefile."""
-
-    def __init__(self, file: File):
-        self._file = file
-        self._parse_targets()
-
-    def _parse_targets(self):
-        self.targets = frozenset(_extract_targets(self._file.text))
 
 
 class RequiredTargets(Pattern):
@@ -90,13 +78,14 @@ class RequiredTargets(Pattern):
 
     id = 'make/missing-required-target'
 
+    required_targets = {'build', 'lint', 'test', 'check', 'clean'}
+
     def check(self, project: Project) -> list[Violation]:
-        files = project.get_files()
         violations = []
-        for file in files:
-            makefile = _Makefile(file.path)
-            for required_target in _required_targets:
-                if required_target not in makefile.targets:
+        for file in project.files:
+            for required_target in self.required_targets:
+                targets = _extract_targets(file.text)
+                if required_target not in targets:
                     location = Location(file.path, line=1, column=1)
                     violations.append(
                         Violation(
@@ -163,4 +152,4 @@ class SuperfolousSpaceInCall(Pattern):
         return violations
 
 
-patterns: set = {RequiredTargets}
+patterns: set = {RequiredTargets, SuperfolousSpaceInCall}

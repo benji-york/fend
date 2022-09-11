@@ -10,9 +10,11 @@ class File:
 
     def __init__(self, path: Path | str, text: str | None = None) -> None:
         self.path = Path(path)
-        if text is None:
-            text = self.path.read_text('utf-8')
-        self.text = text
+
+    
+    @property
+    def text(self):
+        return self.path.read_text('utf-8')
 
     @property
     def lines(self) -> list[str]:

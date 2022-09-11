@@ -19,11 +19,23 @@ def _documentation():
     # This function exists only to provid the text above for the CLI.
 
 
-def _fix(violation: Violation) -> None:
-    lines = violation.location.file.lines
-    line_index = violation.location.line - 1
-    lines[line_index : line_index + len(violation.before)] = violation.after
-    violation.location.file_path.write_text(''.join(lines))
+def _fix(project: Project, patterns: list[Pattern]) -> None:
+    for pattern in patterns:
+        while True:
+            violations = pattern.check(project)
+            if not violations:
+                break
+            # XXX This is not great; since each check is run in isolation, they may undo
+            # a fix from a previous check.  To hack around that, we just fix one
+            # violation and then re-run the entire check.  This points to a serious
+            # deficiency in how we're modeling the problem.
+            violation = violations[0]
+            if violation.after is None:
+                continue
+            lines = violation.location.file.lines
+            line_index = violation.location.line - 1
+            lines[line_index : line_index + len(violation.before)] = violation.after
+            violation.location.file_path.write_text(''.join(lines))
 
 
 def _find_patterns():
@@ -57,7 +69,7 @@ def check(
     enabled_patterns = _find_enabled_patterns(enable or [])
     violations = []
     for pattern in enabled_patterns:
-        violations.extend(pattern.check(Project(filespec)))
+        violations.extend(pattern.check(Project.from_file_path(filespec)))
 
     for violation in violations:
         print(
@@ -78,12 +90,7 @@ def fix(
 ) -> None:
     """Fix any found violations of one or more enabled patterns."""
     enabled_patterns = _find_enabled_patterns(enable or [])
-    violations = []
-    for pattern in enabled_patterns:
-        violations.extend(pattern.check(Project(filespec)))
-
-    for violation in violations:
-        _fix(violation)
+    _fix(Project.from_file_path(filespec), enabled_patterns)
 
 
 main = _app
