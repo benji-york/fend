@@ -11,7 +11,6 @@ coverage==6.4.4
 defusedxml==0.7.1
 dill==0.3.5.1
 docutils==0.19
--e git+ssh://git@github.com/benji-york/fend.git@d4a363d9e20f02d03ae7c7518f37ee5ddfd263b3#egg=fend
 flake8==5.0.4
 genbadge==1.1.0
 idna==3.3
